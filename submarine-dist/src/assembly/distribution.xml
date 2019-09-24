@@ -23,27 +23,39 @@
 
   <dependencySets>
     <dependencySet>
-      <outputDirectory>/</outputDirectory>
+      <outputDirectory>/lib</outputDirectory>
       <includes>
         <include>org.apache.submarine:submarine-core</include>
       </includes>
     </dependencySet>
     <dependencySet>
-      <outputDirectory>/</outputDirectory>
+      <outputDirectory>/lib</outputDirectory>
       <includes>
         <include>org.apache.submarine:tony-runtime</include>
       </includes>
     </dependencySet>
     <dependencySet>
-      <outputDirectory>/</outputDirectory>
+      <outputDirectory>/lib</outputDirectory>
       <includes>
         <include>org.apache.submarine:yarnservice-runtime</include>
       </includes>
     </dependencySet>
     <dependencySet>
-      <outputDirectory>/</outputDirectory>
+      <outputDirectory>/lib</outputDirectory>
       <includes>
         <include>com.linkedin.tony:tony-core</include>
+      </includes>
+    </dependencySet>
+    <dependencySet>
+      <outputDirectory>/lib/server</outputDirectory>
+      <includes>
+        <include>org.apache.submarine:submarine-server</include>
+      </includes>
+    </dependencySet>
+    <dependencySet>
+      <outputDirectory>/</outputDirectory>
+      <includes>
+        <include>org.apache.submarine:submarine-web</include>
       </includes>
     </dependencySet>
   </dependencySets>
@@ -68,10 +80,14 @@
     </fileSet>
     <fileSet>
       <directory>../submarine-all/target/</directory>
-      <outputDirectory>/</outputDirectory>
+      <outputDirectory>/lib</outputDirectory>
       <includes>
         <include>submarine-all-${project.version}-*.jar</include>
       </includes>
+    </fileSet>
+    <fileSet>
+      <directory>../submarine-workbench/submarine-server/target/dependency</directory>
+      <outputDirectory>/lib/server</outputDirectory>
     </fileSet>
   </fileSets>
 
