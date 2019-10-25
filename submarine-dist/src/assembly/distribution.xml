@@ -142,6 +142,13 @@
         <include>commons-cluster-${project.version}-shade.jar</include>
       </includes>
     </fileSet>
+    <fileSet>
+      <directory>../submarine-launcher/launcher-docker/target</directory>
+      <outputDirectory>/lib/launcher</outputDirectory>
+      <includes>
+        <include>launcher-docker-${project.version}-shade.jar</include>
+      </includes>
+    </fileSet>
   </fileSets>
 
 </assembly>

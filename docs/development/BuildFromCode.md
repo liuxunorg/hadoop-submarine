@@ -22,23 +22,6 @@
 
 ## Quick Start
 
-### Init submodule
-LinkedIn TensorFlow on YARN (TonY) project is included in the Submarine as a 
-submodule. If you just clone Submarine project, please initialize the TonY
-project using the following command.
-
-```
-git submodule update --init --recursive
-```
-
-### Update submodule
-After the initialization, when you want to update tony project, please execute a
-command like this.
-
-```
-git submodule update --recursive
-```
-
 ### Building the code
 
 + Checking releases for licenses
@@ -83,7 +66,36 @@ mvn clean install package -DskipTests -Phadoop-3.2
 mvn clean install package -DskipTests -Psrc
 ```
 
+## Minimize compilation
+
+### Compile Sumarine Launcher
+
+```
+cd <submarine-project-dir>/submarine-commons
+mvn clean package install -DskipTest
+
+cd <submarine-project-dir>/submarine-launcher/
+mvn clean package install -DskipTest
+```
+
 ## TonY code modification
+
+### Init submodule
+LinkedIn TensorFlow on YARN (TonY) project is included in submarine as a 
+submodule. If you just clone submarine project, please initialize the tony
+project using the following command.
+
+```
+git submodule update --init --recursive
+```
+
+### Update submodule
+After the initialization, when you want to update tony project, please execute a
+command like this.
+
+```
+git submodule update --recursive
+```
 
 If it is needed to make modifications to TonY project, please make sure
 both submarine and tony project are committed.

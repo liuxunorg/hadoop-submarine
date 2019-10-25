@@ -43,11 +43,13 @@ if [[ -f "${SUBMARINE_CONF_DIR}/submarine-env.sh" ]]; then
 fi
 
 WORKBENCH_CLASSPATH+=":${SUBMARINE_CONF_DIR}"
+LAUNCHE_CLASSPATH+=":${SUBMARINE_CONF_DIR}"
 
 function add_each_jar_in_dir(){
   if [[ -d "${1}" ]]; then
     for jar in $(find -L "${1}" -maxdepth 1 -name '*jar'); do
-      WORKBENCH_CLASSPATH="$jar:$WORKBENCH_CLASSPATH"
+      WORKBENCH_CLASSPATH="${jar}:${WORKBENCH_CLASSPATH}"
+      LAUNCHE_CLASSPATH="${jar}:${LAUNCHE_CLASSPATH}"
     done
   fi
 }
@@ -55,7 +57,8 @@ function add_each_jar_in_dir(){
 function add_each_jar_in_dir_recursive(){
   if [[ -d "${1}" ]]; then
     for jar in $(find -L "${1}" -type f -name '*jar'); do
-      WORKBENCH_CLASSPATH="$jar:$WORKBENCH_CLASSPATH"
+      WORKBENCH_CLASSPATH="${jar}:${WORKBENCH_CLASSPATH}"
+      LAUNCHE_CLASSPATH="${jar}:${LAUNCHE_CLASSPATH}"
     done
   fi
 }
@@ -63,6 +66,7 @@ function add_each_jar_in_dir_recursive(){
 function add_jar_in_dir(){
   if [[ -d "${1}" ]]; then
     WORKBENCH_CLASSPATH="${1}/*:${WORKBENCH_CLASSPATH}"
+    LAUNCHE_CLASSPATH="${1}/*:${LAUNCHE_CLASSPATH}"
   fi
 }
 
@@ -78,9 +82,13 @@ function download_mysql_jdbc_jar(){
   echo "Mysql jdbc jar is downloaded and put in the path of workbench/lib."
 }
 
-JAVA_OPTS+=" ${WORKBENCH_JAVA_OPTS} -Dfile.encoding=UTF-8 ${WORKBENCH_MEM}"
-JAVA_OPTS+=" -Dlog4j.configuration=file://${SUBMARINE_CONF_DIR}/log4j.properties"
-export JAVA_OPTS
+WORKBENCH_JAVA_OPTS_MERGE+=" ${WORKBENCH_JAVA_OPTS} -Dfile.encoding=UTF-8 ${WORKBENCH_MEM}"
+WORKBENCH_JAVA_OPTS_MERGE+=" -Dlog4j.configuration=file://${SUBMARINE_CONF_DIR}/log4j.properties"
+export WORKBENCH_JAVA_OPTS_MERGE
+
+LAUNCHER_JAVA_OPTS_MERGE+=" ${LAUNCHER_JAVA_OPTS} -Dfile.encoding=UTF-8 ${LAUNCHER_MEM}"
+LAUNCHER_JAVA_OPTS_MERGE+=" -Dlog4j.configuration=file://${SUBMARINE_CONF_DIR}/log4j.properties"
+export LAUNCHER_JAVA_OPTS_MERGE
 
 if [[ -n "${JAVA_HOME}" ]]; then
   JAVA_RUNNER="${JAVA_HOME}/bin/java"

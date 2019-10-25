@@ -19,7 +19,7 @@
 # description: Start and stop daemon script for.
 #
 
-USAGE="-e Usage: workbench-daemon.sh {start|stop|restart|status}"
+USAGE="-e Usage: submarine-launcher.sh [start|stop] [SUBMARINE_SERVER|WORKBENCH_SERVER] id"
 
 if [ -L ${BASH_SOURCE-$0} ]; then
   BIN=$(dirname $(readlink "${BASH_SOURCE-$0}"))
@@ -27,19 +27,17 @@ else
   BIN=$(dirname ${BASH_SOURCE-$0})
 fi
 export BIN=$(cd "${BIN}">/dev/null; pwd)
-GET_MYSQL_JAR=false
 
 . "${BIN}/common.sh"
 
 cd ${BIN}/>/dev/null
 
-WORKBENCH_NAME="Submarine Workbench"
-WORKBENCH_LOGFILE="${SUBMARINE_LOG_DIR}/workbench.log"
-WORKBENCH_MAIN=org.apache.submarine.server.WorkbenchServer
-WORKBENCH_JAVA_OPTS_MERGE+=" -Dworkbench.log.file=${WORKBENCH_LOGFILE}"
+LAUNCHER_NAME="Submarine Launcher"
+LAUNCHER_LOGFILE="${SUBMARINE_LOG_DIR}/launcher.log"
+LAUNCHER_MAIN=org.apache.submarine.launcher.LauncherProcess
+LAUNCHER_JAVA_OPTS_MERGE+=" -Dlauncher.log.file=${LAUNCHER_LOGFILE}"
 
-add_jar_in_dir "${BIN}/../workbench"
-add_jar_in_dir "${BIN}/../workbench/lib"
+add_jar_in_dir "${BIN}/lib/lancher"
 
 function initialize_default_directories() {
   if [[ ! -d "${SUBMARINE_LOG_DIR}" ]]; then
@@ -48,8 +46,8 @@ function initialize_default_directories() {
   fi
 }
 
-function found_workbench_server_pid() {
-  process='WorkbenchServer';
+function found_launcher_pid() {
+  process='LauncherProcess';
   RUNNING_PIDS=$(ps x | grep ${process} | grep -v grep | awk '{print $1}');
 
   if [[ -z "${RUNNING_PIDS}" ]]; then
@@ -57,17 +55,17 @@ function found_workbench_server_pid() {
   fi
 
   if ! kill -0 ${RUNNING_PIDS} > /dev/null 2>&1; then
-    echo "${WORKBENCH_NAME} running but process is dead"
+    echo "${LAUNCHER_NAME} running but process is dead"
   fi
 
   echo "${RUNNING_PIDS}"
 }
 
-function wait_for_workbench_to_die() {
+function wait_for_launcher_to_die() {
   local pid
   local count
 
-  pid=`found_workbench_server_pid`
+  pid=`found_launcher_pid`
   timeout=10
   count=0
   timeoutTime=$(date "+%s")
@@ -91,80 +89,54 @@ function wait_for_workbench_to_die() {
   fi
 }
 
-function check_jdbc_jar() {
-  if [[ -d "${1}" ]]; then
-    mysql_connector_exists=$(find -L "${1}" -name "mysql-connector*")
-    if [[ -z "${mysql_connector_exists}" ]]; then
-      if [[ ${GET_MYSQL_JAR} = true ]]; then
-        download_mysql_jdbc_jar
-      else
-        echo -e "\\033[31mError: There is no mysql jdbc jar in workbench/lib.\\033[0m"
-        echo -e "\\033[31mPlease download a mysql jdbc jar and put it under workbench/lib manually.\\033[0m"
-        echo -e "\\033[31mOr add a parameter getMysqlJar, like this:\n./bin/workbench-daemon.sh start getMysqlJar\\033[0m"
-        echo -e "\\033[31mIt would download mysql jdbc jar automatically.\\033[0m"
-        exit 1
-      fi
-    fi
-  fi
-}
-
 function start() {
   local pid
 
-  pid=`found_workbench_server_pid`
+  pid=`found_launcher_pid`
   if [[ ! -z "$pid" && "$pid" != 0 ]]; then
-    echo "${WORKBENCH_NAME}:${pid} is already running"
+    echo "${LAUNCHER_NAME}:${pid} is already running"
     return 0;
   fi
 
-  check_jdbc_jar "${BIN}/../workbench/lib"
-
   initialize_default_directories
 
-  echo "WORKBENCH_CLASSPATH: ${WORKBENCH_CLASSPATH}" >> "${WORKBENCH_LOGFILE}"
-
-  nohup $JAVA_RUNNER ${WORKBENCH_JAVA_OPTS_MERGE} -cp $WORKBENCH_CLASSPATH $WORKBENCH_MAIN >> "${WORKBENCH_LOGFILE}" 2>&1 < /dev/null &
+  nohup $JAVA_RUNNER ${LAUNCHER_JAVA_OPTS_MERGE} ${LAUNCHER_MAIN} >> "${LAUNCHER_LOGFILE}" 2>&1 < /dev/null &
   pid=$!
   if [[ ! -z "${pid}" ]]; then
-    echo "${WORKBENCH_NAME} start"
+    echo "${LAUNCHER_NAME} start"
     return 1;
   fi
 }
 
 function stop() {
   local pid
-  pid=`found_workbench_server_pid`
+  pid=`found_launcher_pid`
 
   if [[ -z "$pid" ]]; then
-    echo "${WORKBENCH_NAME} is not running"
+    echo "${LAUNCHER_NAME} is not running"
     return 0;
   else
-    # submarine workbench daemon kill
-    wait_for_workbench_to_die
-    echo "${WORKBENCH_NAME} stop"
+    wait_for_launcher_to_die
+    echo "${LAUNCHER_NAME} stop"
   fi
 }
 
-function find_workbench_process() {
+function find_launcher_process() {
   local pid
-  pid=`found_workbench_server_pid`
+  pid=`found_launcher_pid`
 
   if [[ -z "$pid" ]]; then
-    echo "${WORKBENCH_NAME} is not running"
+    echo "${LAUNCHER_NAME} is not running"
     return 1
   else
     if ! kill -0 ${pid} > /dev/null 2>&1; then
-      echo "${WORKBENCH_NAME} running but process is dead"
+      echo "${LAUNCHER_NAME} running but process is dead"
       return 1
     else
-      echo "${WORKBENCH_NAME} is running"
+      echo "${LAUNCHER_NAME} is running"
     fi
   fi
 }
-
-if [[ "$2" = "getMysqlJar" ]]; then
-  export GET_MYSQL_JAR=true
-fi
 
 case "${1}" in
   start)
@@ -174,12 +146,12 @@ case "${1}" in
     stop
     ;;
   restart)
-    echo "${WORKBENCH_NAME} is restarting" >> "${WORKBENCH_LOGFILE}"
+    echo "${LAUNCHER_NAME} is restarting" >> "${LAUNCHER_LOGFILE}"
     stop
     start
     ;;
   status)
-    find_workbench_process
+    find_launcher_process
     ;;
   *)
     echo ${USAGE}

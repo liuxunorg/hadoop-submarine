@@ -114,6 +114,10 @@
     <zeppelin.version>0.9.0-SNAPSHOT</zeppelin.version>
     <jgit.version>5.5.1.201910021850-r</jgit.version>
     <atomix.version>3.0.0-rc4</atomix.version>
+    <jinjava.version>2.4.12</jinjava.version>
+    <spotify.docker.version>8.15.2</spotify.docker.version>
+    <com.fasterxml.jackson.jaxrs.version>2.9.8</com.fasterxml.jackson.jaxrs.version>
+    <org.apache.httpcomponents.version>4.4.5</org.apache.httpcomponents.version>
   </properties>
 
   <modules>
@@ -121,6 +125,7 @@
     <module>submarine-client</module>
     <module>submarine-commons</module>
     <module>submarine-dist</module>
+    <module>submarine-launcher</module>
     <module>submarine-server</module>
     <module>submarine-workbench</module>
     <module>submarine-test</module>

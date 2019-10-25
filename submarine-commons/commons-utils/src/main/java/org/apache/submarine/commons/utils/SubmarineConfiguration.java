@@ -27,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
@@ -276,6 +277,37 @@ public class SubmarineConfiguration extends XMLConfiguration {
     return getString(ConfVars.WORKBENCH_WEBSOCKET_MAX_TEXT_MESSAGE_SIZE);
   }
 
+  public String getSubmarineServerImage() {
+    return getString(ConfVars.SUBMARINE_SERVER_IMAGE);
+  }
+
+  public String getWorkbenchServerImage() {
+    return getString(ConfVars.WORKBENCH_SERVER_IMAGE);
+  }
+
+  public String getUserWorkspaceImage() {
+    return getString(ConfVars.USER_WORKSPACE_IMAGE);
+  }
+
+  public int getLauncherTimeout() {
+    return getInt(ConfVars.LAUNCHER_TIMEOUT);
+  }
+
+  public String getSubmarineHome() throws IOException {
+    String submarineHome = "";
+    if (System.getenv("SUBMARINE_HOME") != null) {
+      submarineHome = System.getenv("SUBMARINE_HOME");
+    }
+
+    // check submarineHome is exist
+    File filesubmarineHome = new File(submarineHome);
+    if (filesubmarineHome.exists() && filesubmarineHome.isDirectory()) {
+      return submarineHome;
+    }
+
+    throw new IOException("Can't find submarine home path!");
+  }
+
   private String getStringValue(String name, String d) {
     String value = this.properties.get(name);
     if (value != null) {
@@ -417,6 +449,11 @@ public class SubmarineConfiguration extends XMLConfiguration {
         "failOverReadOnly=false&amp;zeroDateTimeBehavior=convertToNull&amp;useSSL=false"),
     JDBC_USERNAME("jdbc.username", "submarine"),
     JDBC_PASSWORD("jdbc.password", "password"),
+    LAUNCHER_MODE("launcher.mode", "local"),
+    LAUNCHER_TIMEOUT("launcher.timeout", 9000),
+    SUBMARINE_SERVER_IMAGE("submarine.server.image", ""),
+    WORKBENCH_SERVER_IMAGE("workbench.server.image", ""),
+    USER_WORKSPACE_IMAGE("user.workspace.image", ""),
     WORKBENCH_WEBSOCKET_MAX_TEXT_MESSAGE_SIZE(
         "workbench.websocket.max.text.message.size", "1024000"),
     WORKBENCH_WEB_WAR("workbench.web.war", "submarine-workbench/workbench-web/dist");
