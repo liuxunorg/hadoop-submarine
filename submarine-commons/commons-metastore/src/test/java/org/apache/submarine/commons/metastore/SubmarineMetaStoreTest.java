@@ -40,7 +40,7 @@ public class SubmarineMetaStoreTest {
 
   @Test
   public void createDatabase() throws InvalidObjectException, MetaException {
-    System.out.println("createDatabase <<< ");
+    System.out.println("createDatabase <<<1 ");
 
     String url = "jdbc:mysql://127.0.0.1:3306/metastoredb_test?" +
         "useUnicode=true&amp;characterEncoding=UTF-8&amp;autoReconnect=true&amp;" +
@@ -63,11 +63,11 @@ public class SubmarineMetaStoreTest {
         System.out.println("table:" + pass);
       }
     } catch (SQLException se) {
-      System.out.println("数据库连接失败！");
-      LOG.info("123 数据库连接失败 >>> {}", se.getMessage());
+      se.printStackTrace();
+      LOG.info("123= {} {}", se.getErrorCode(), se.getMessage());
     }
 
-    System.out.println("createDatabase >>> ");
+    System.out.println("createDatabase >>>2 ");
     assertTrue(false);
   }
 }
