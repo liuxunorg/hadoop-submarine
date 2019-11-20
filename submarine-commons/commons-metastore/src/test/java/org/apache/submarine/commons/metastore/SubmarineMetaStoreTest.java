@@ -22,7 +22,7 @@ package org.apache.submarine.commons.metastore;
 import org.apache.hadoop.hive.metastore.api.InvalidObjectException;
 import org.apache.hadoop.hive.metastore.api.MetaException;
 import org.apache.submarine.commons.utils.SubmarineConfiguration;
-import org.junit.Before;
+import org.junit.Test;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -34,7 +34,7 @@ import static org.junit.Assert.assertTrue;
 public class SubmarineMetaStoreTest {
   private static final SubmarineConfiguration submarineConf = SubmarineConfiguration.getInstance();
 
-  @Before
+  @Test
   public void createDatabase() throws InvalidObjectException, MetaException {
     System.out.println("createDatabase <<< ");
 
