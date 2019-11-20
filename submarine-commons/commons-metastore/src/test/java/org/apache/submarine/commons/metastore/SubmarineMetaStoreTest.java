@@ -42,7 +42,7 @@ public class SubmarineMetaStoreTest {
   public void createDatabase() throws InvalidObjectException, MetaException {
     System.out.println("createDatabase <<<1 ");
 
-    String url = "jdbc:mysql://127.0.0.1:3306/metastoredb_test?" +
+    String url = "jdbc:mysql://127.0.0.1:3306/metastoreDB_test?" +
         "useUnicode=true&amp;characterEncoding=UTF-8&amp;autoReconnect=true&amp;" +
         "failOverReadOnly=false&amp;zeroDateTimeBehavior=convertToNull&amp;useSSL=false";
     String username = "metastore_test";
