@@ -23,6 +23,8 @@ import org.apache.hadoop.hive.metastore.api.InvalidObjectException;
 import org.apache.hadoop.hive.metastore.api.MetaException;
 import org.apache.submarine.commons.utils.SubmarineConfiguration;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -32,6 +34,8 @@ import java.sql.Statement;
 import static org.junit.Assert.assertTrue;
 
 public class SubmarineMetaStoreTest {
+  private static Logger LOG = LoggerFactory.getLogger(SubmarineMetaStoreTest.class);
+
   private static final SubmarineConfiguration submarineConf = SubmarineConfiguration.getInstance();
 
   @Test
@@ -60,6 +64,7 @@ public class SubmarineMetaStoreTest {
       }
     } catch (SQLException se) {
       System.out.println("数据库连接失败！");
+      LOG.info("123 数据库连接失败 >>> {}", se.getMessage());
     }
 
     System.out.println("createDatabase >>> ");
