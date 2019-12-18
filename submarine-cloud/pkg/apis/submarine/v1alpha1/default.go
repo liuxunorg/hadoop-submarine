@@ -52,7 +52,7 @@ func DefaultSubmarineCluster(undefaultSubmarineCluster *SubmarineCluster) *Subma
 	rc.Status.Cluster.MaxReplicationFactor = 0
 	rc.Status.Cluster.NbPods = 0
 	rc.Status.Cluster.NbPodsReady = 0
-	rc.Status.Cluster.NbSubmarineRunning = 0
+	rc.Status.Cluster.NbRedisRunning = 0
 
 	return rc
 }

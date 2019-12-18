@@ -185,10 +185,10 @@ type SubmarineClusterClusterStatus struct {
 
 	NodesPlacement NodesPlacementInfo `json:"nodesPlacementInfo,omitempty"`
 
-	// In theory, we always have NbPods > NbSubmarineRunning > NbPodsReady
-	NbPods             int32 `json:"nbPods,omitempty"`
-	NbPodsReady        int32 `json:"nbPodsReady,omitempty"`
-	NbSubmarineRunning int32 `json:"nbSubmarineNodesRunning,omitempty"`
+	// In theory, we always have NbPods > NbRedisRunning > NbPodsReady
+	NbPods         int32 `json:"nbPods,omitempty"`
+	NbPodsReady    int32 `json:"nbPodsReady,omitempty"`
+	NbRedisRunning int32 `json:"nbSubmarineNodesRunning,omitempty"`
 
 	Nodes []SubmarineClusterNode `json:"nodes"`
 }
@@ -202,7 +202,7 @@ func (s SubmarineClusterClusterStatus) String() string {
 	output += fmt.Sprintf("NodesPlacement:%s\n\n", s.NodesPlacement)
 	output += fmt.Sprintf("NbPods:%d\n", s.NbPods)
 	output += fmt.Sprintf("NbPodsReady:%d\n", s.NbPodsReady)
-	output += fmt.Sprintf("NbSubmarineRunning:%d\n\n", s.NbSubmarineRunning)
+	output += fmt.Sprintf("NbRedisRunning:%d\n\n", s.NbRedisRunning)
 
 	output += fmt.Sprintf("Nodes (%d): %s\n", len(s.Nodes), s.Nodes)
 

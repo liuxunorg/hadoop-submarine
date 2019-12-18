@@ -29,7 +29,7 @@ This script use kind to create Kubernetes cluster, about kind please refer: http
 
 Options:
        -h,--help               prints the usage message
-       -n,--name               name of the Kubernetes cluster,default value: kind
+       -n,--name               name of the Kubernetes cluster,default value: submarine
        -c,--nodeNum            the count of the cluster nodes,default value: 1
        -k,--k8sVersion         version of the Kubernetes cluster,default value: v1.12.8
        -v,--volumeNum          the volumes number of each kubernetes node,default value: 1
@@ -75,7 +75,7 @@ case $key in
 esac
 done
 
-clusterName=${clusterName:-kind}
+clusterName=${clusterName:-submarine}
 nodeNum=${nodeNum:-1}
 k8sVersion=${k8sVersion:-v1.12.8}
 volumeNum=${volumeNum:-1}

@@ -17,8 +17,14 @@
 package pod
 
 import (
+	"bytes"
+	"encoding/json"
+	"crypto/md5"
+	"encoding/hex"
+	"fmt"
 	rapi "github.com/apache/submarine/submarine-cloud/pkg/apis/submarine/v1alpha1"
 	"github.com/golang/glog"
+	"io"
 	kapiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	clientset "k8s.io/client-go/kubernetes"
@@ -65,7 +71,12 @@ func (p *SubmarineClusterControl) GetSubmarineClusterPods(submarineCluster *rapi
 // CreatePod used to create a Pod from the SubmarineCluster pod template
 func (p *SubmarineClusterControl) CreatePod(submarineCluster *rapi.SubmarineCluster) (*kapiv1.Pod, error) {
 	glog.Infof("CreatePod()")
-	return nil, nil
+	pod, err := initPod(submarineCluster)
+	if err != nil {
+		return pod, err
+	}
+	glog.V(6).Infof("CreatePod: %s/%s", submarineCluster.Namespace, pod.Name)
+	return p.KubeClient.CoreV1().Pods(submarineCluster.Namespace).Create(pod)
 }
 
 // DeletePod used to delete a pod from its name
@@ -85,4 +96,72 @@ func (p *SubmarineClusterControl) DeletePodNow(submarineCluster *rapi.SubmarineC
 func (p *SubmarineClusterControl) deletePodGracefullperiode(submarineCluster *rapi.SubmarineCluster, podName string, period *int64) error {
 	glog.Infof("deletePodGracefullperiode()")
 	return p.KubeClient.CoreV1().Pods(submarineCluster.Namespace).Delete(podName, &metav1.DeleteOptions{GracePeriodSeconds: period})
+}
+
+// GenerateMD5Spec used to generate the PodSpec MD5 hash
+func GenerateMD5Spec(spec *kapiv1.PodSpec) (string, error) {
+	b, err := json.Marshal(spec)
+	if err != nil {
+		return "", err
+	}
+	hash := md5.New()
+	io.Copy(hash, bytes.NewReader(b))
+	return hex.EncodeToString(hash.Sum(nil)), nil
+}
+
+// Add the necessary tags to the Pod. These tags are used to determine whether a Pod is managed by the Operator and associated with a RedisCluster
+func initPod(redisCluster *rapi.SubmarineCluster) (*kapiv1.Pod, error) {
+	if redisCluster == nil {
+		return nil, fmt.Errorf("rediscluster nil pointer")
+	}
+
+	desiredLabels, err := GetLabelsSet(redisCluster)
+	if err != nil {
+		return nil, err
+	}
+	desiredAnnotations, err := GetAnnotationsSet(redisCluster)
+	if err != nil {
+		return nil, err
+	}
+	PodName := fmt.Sprintf("rediscluster-%s-", redisCluster.Name)
+	pod := &kapiv1.Pod{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace:       redisCluster.Namespace,
+			Labels:          desiredLabels,
+			Annotations:     desiredAnnotations,
+			GenerateName:    PodName,
+			OwnerReferences: []metav1.OwnerReference{BuildOwnerReference(redisCluster)},
+		},
+	}
+
+	if redisCluster.Spec.PodTemplate == nil {
+		return nil, fmt.Errorf("rediscluster[%s/%s] PodTemplate missing", redisCluster.Namespace, redisCluster.Name)
+	}
+	pod.Spec = *redisCluster.Spec.PodTemplate.Spec.DeepCopy()
+
+	// Generate a MD5 representing the PodSpec send
+	hash, err := GenerateMD5Spec(&pod.Spec)
+	if err != nil {
+		return nil, err
+	}
+	pod.Annotations[rapi.PodSpecMD5LabelKey] = hash
+
+	return pod, nil
+}
+
+// BuildOwnerReference used to build the OwnerReference from a RedisCluster
+func BuildOwnerReference(cluster *rapi.SubmarineCluster) metav1.OwnerReference {
+	controllerRef := metav1.OwnerReference{
+		APIVersion: rapi.SchemeGroupVersion.String(),
+		Kind:       rapi.ResourceKind,
+		Name:       cluster.Name,
+		UID:        cluster.UID,
+		Controller: boolPtr(true),
+	}
+
+	return controllerRef
+}
+
+func boolPtr(value bool) *bool {
+	return &value
 }

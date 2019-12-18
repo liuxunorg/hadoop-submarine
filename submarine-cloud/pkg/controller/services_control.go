@@ -68,3 +68,11 @@ func (s *ServicesControl) DeleteSubmarineClusterService(submarineCluster *rapi.S
 	glog.Infof("DeleteSubmarineClusterService()")
 	return nil
 }
+
+func getServiceName(redisCluster *rapi.SubmarineCluster) string {
+	serviceName := redisCluster.Name
+	if redisCluster.Spec.ServiceName != "" {
+		serviceName = redisCluster.Spec.ServiceName
+	}
+	return serviceName
+}
