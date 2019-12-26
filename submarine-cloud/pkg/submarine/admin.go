@@ -60,7 +60,6 @@ type AdminOptions struct {
 	RenameCommandsFile string
 }
 
-
 // Admin wraps redis cluster admin logic
 type Admin struct {
 	///hashMaxSlots Slot

@@ -52,7 +52,7 @@ type Controller struct {
 	submarineClient sClient.Interface
 
 	submarineClusterLister sListers.SubmarineClusterLister
-	submarineClusterSynced cache.InformerSynced
+	SubmarineClusterSynced cache.InformerSynced
 
 	podLister corev1listers.PodLister
 	PodSynced cache.InformerSynced
@@ -91,7 +91,7 @@ func NewController(cfg *Config, kubeClient clientset.Interface, submarineClient 
 		kubeClient:                 kubeClient,
 		submarineClient:            submarineClient,
 		submarineClusterLister:     submarineInformer.Lister(),
-		submarineClusterSynced:     submarineInformer.Informer().HasSynced,
+		SubmarineClusterSynced:     submarineInformer.Informer().HasSynced,
 		podLister:                  podInformer.Lister(),
 		PodSynced:                  podInformer.Informer().HasSynced,
 		serviceLister:              serviceInformer.Lister(),
@@ -133,7 +133,7 @@ func NewController(cfg *Config, kubeClient clientset.Interface, submarineClient 
 func (c *Controller) Run(stop <-chan struct{}) error {
 	glog.Infof("Starting SubmarineCluster controller")
 
-	if !cache.WaitForCacheSync(stop, c.PodSynced, c.submarineClusterSynced, c.ServiceSynced) {
+	if !cache.WaitForCacheSync(stop, c.PodSynced, c.SubmarineClusterSynced, c.ServiceSynced) {
 		return fmt.Errorf("Timed out waiting for caches to sync")
 	}
 
@@ -284,7 +284,7 @@ func (c *Controller) syncCluster(submarineCluster *rapi.SubmarineCluster) (force
 	// From the Redis cluster nodes connections, build the cluster status
 	// Calculate the actual cluster status through node information, cluster Pod list, and CR
 	// The cluster status includes: whether it is normal, the number of Ready Pods, the number of Masters,
-	//  the number of Redis instances in operation, the list of Redis instances, replication factors, etc.
+	// the number of Redis instances in operation, the list of Redis instances, replication factors, etc.
 	clusterStatus, err := c.buildClusterStatus(clusterInfos, redisClusterPods)
 	if err != nil {
 		glog.Errorf("unable to build the RedisClusterStatus, err:%v", err)

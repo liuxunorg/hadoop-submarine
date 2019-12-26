@@ -9,7 +9,7 @@ import (
 	podctrl "github.com/apache/submarine/submarine-cloud/pkg/controller/pod"
 )
 
-//Divide pods for lost and other
+// Divide pods for lost and other
 func filterLostNodes(pods []*kapi.Pod) (ok []*kapi.Pod, ko []*kapi.Pod) {
 	for _, pod := range pods {
 		if pod.Status.Reason == "NodeLost" {
