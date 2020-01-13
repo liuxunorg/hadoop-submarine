@@ -662,4 +662,3 @@ func (c *Controller) getRedisClusterFromPod(pod *apiv1.Pod) (*rapi.SubmarineClus
 	}
 	return c.submarineClusterLister.SubmarineClusters(pod.Namespace).Get(clusterName)
 }
-

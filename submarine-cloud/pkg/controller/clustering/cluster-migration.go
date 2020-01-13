@@ -3,8 +3,8 @@ package clustering
 import (
 	"fmt"
 	v1 "github.com/apache/submarine/submarine-cloud/pkg/apis/submarine/v1alpha1"
-	"github.com/golang/glog"
 	"github.com/apache/submarine/submarine-cloud/pkg/submarine"
+	"github.com/golang/glog"
 )
 
 // DispatchMasters used to select nodes with master roles

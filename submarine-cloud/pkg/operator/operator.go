@@ -19,14 +19,14 @@ package operator
 import (
 	"context"
 	"fmt"
-	"net/http"
 	"github.com/apache/submarine/submarine-cloud/pkg/client"
 	"github.com/apache/submarine/submarine-cloud/pkg/controller"
+	"github.com/heptiolabs/healthcheck"
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
+	"net/http"
 	"time"
-	"github.com/heptiolabs/healthcheck"
 
 	submarineInformers "github.com/apache/submarine/submarine-cloud/pkg/client/informers/externalversions"
 	kubeinformers "k8s.io/client-go/informers"
@@ -42,7 +42,7 @@ type SubmarineOperator struct {
 	submarineInformerFactory submarineInformers.SharedInformerFactory
 	controller               *controller.Controller
 	// Kubernetes Probes handler
-	health healthcheck.Handler
+	health     healthcheck.Handler
 	httpServer *http.Server
 }
 

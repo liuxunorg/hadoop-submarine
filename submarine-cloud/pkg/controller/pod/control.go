@@ -18,9 +18,9 @@ package pod
 
 import (
 	"bytes"
-	"encoding/json"
 	"crypto/md5"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	rapi "github.com/apache/submarine/submarine-cloud/pkg/apis/submarine/v1alpha1"
 	"github.com/golang/glog"

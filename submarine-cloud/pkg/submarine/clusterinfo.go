@@ -56,64 +56,64 @@ func NewClusterInfos() *ClusterInfos {
 func DecodeNodeInfos(input *string, addr string) *NodeInfos {
 	infos := NewNodeInfos()
 	/*
-	lines := strings.Split(*input, "\n")
-	for _, line := range lines {
-		values := strings.Split(line, " ")
-		if len(values) < 8 {
-			// last line is always empty
-			glog.V(7).Infof("Not enough values in line split, ignoring line: '%s'", line)
-			continue
-		} else {
-			node := NewDefaultNode()
-
-			node.ID = values[0]
-			//remove trailing port for cluster internal protocol
-			ipPort := strings.Split(values[1], "@")
-			if ip, port, err := net.SplitHostPort(ipPort[0]); err == nil {
-				node.IP = ip
-				node.Port = port
-				if ip == "" {
-					// ip of the node we are connecting to is sometime empty
-					node.IP, _, _ = net.SplitHostPort(addr)
-				}
+		lines := strings.Split(*input, "\n")
+		for _, line := range lines {
+			values := strings.Split(line, " ")
+			if len(values) < 8 {
+				// last line is always empty
+				glog.V(7).Infof("Not enough values in line split, ignoring line: '%s'", line)
+				continue
 			} else {
-				glog.Errorf("Error while decoding node info for node '%s', cannot split ip:port ('%s'): %v", node.ID, values[1], err)
-			}
-			node.SetRole(values[2])
-			node.SetFailureStatus(values[2])
-			node.SetReferentMaster(values[3])
-			if i, err := strconv.ParseInt(values[4], 10, 64); err == nil {
-				node.PingSent = i
-			}
-			if i, err := strconv.ParseInt(values[5], 10, 64); err == nil {
-				node.PongRecv = i
-			}
-			if i, err := strconv.ParseInt(values[6], 10, 64); err == nil {
-				node.ConfigEpoch = i
-			}
-			node.SetLinkStatus(values[7])
+				node := NewDefaultNode()
 
-			for _, slot := range values[8:] {
-				if s, importing, migrating, err := DecodeSlotRange(slot); err == nil {
-					node.Slots = append(node.Slots, s...)
-					if importing != nil {
-						node.ImportingSlots[importing.SlotID] = importing.FromNodeID
+				node.ID = values[0]
+				//remove trailing port for cluster internal protocol
+				ipPort := strings.Split(values[1], "@")
+				if ip, port, err := net.SplitHostPort(ipPort[0]); err == nil {
+					node.IP = ip
+					node.Port = port
+					if ip == "" {
+						// ip of the node we are connecting to is sometime empty
+						node.IP, _, _ = net.SplitHostPort(addr)
 					}
-					if migrating != nil {
-						node.MigratingSlots[migrating.SlotID] = migrating.ToNodeID
+				} else {
+					glog.Errorf("Error while decoding node info for node '%s', cannot split ip:port ('%s'): %v", node.ID, values[1], err)
+				}
+				node.SetRole(values[2])
+				node.SetFailureStatus(values[2])
+				node.SetReferentMaster(values[3])
+				if i, err := strconv.ParseInt(values[4], 10, 64); err == nil {
+					node.PingSent = i
+				}
+				if i, err := strconv.ParseInt(values[5], 10, 64); err == nil {
+					node.PongRecv = i
+				}
+				if i, err := strconv.ParseInt(values[6], 10, 64); err == nil {
+					node.ConfigEpoch = i
+				}
+				node.SetLinkStatus(values[7])
+
+				for _, slot := range values[8:] {
+					if s, importing, migrating, err := DecodeSlotRange(slot); err == nil {
+						node.Slots = append(node.Slots, s...)
+						if importing != nil {
+							node.ImportingSlots[importing.SlotID] = importing.FromNodeID
+						}
+						if migrating != nil {
+							node.MigratingSlots[migrating.SlotID] = migrating.ToNodeID
+						}
 					}
 				}
-			}
 
-			if strings.HasPrefix(values[2], "myself") {
-				infos.Node = node
-				glog.V(7).Infof("Getting node info for node: '%s'", node)
-			} else {
-				infos.Friends = append(infos.Friends, node)
-				glog.V(7).Infof("Adding node to slice: '%s'", node)
+				if strings.HasPrefix(values[2], "myself") {
+					infos.Node = node
+					glog.V(7).Infof("Getting node info for node: '%s'", node)
+				} else {
+					infos.Friends = append(infos.Friends, node)
+					glog.V(7).Infof("Adding node to slice: '%s'", node)
+				}
 			}
-		}
-	}*/
+		}*/
 
 	return infos
 }
@@ -129,25 +129,24 @@ func (c *ClusterInfos) ComputeStatus() bool {
 	return true
 
 	/*
-	consistencyStatus := false
+		consistencyStatus := false
 
-	consolidatedView := c.GetNodes().SortByFunc(LessByID)
-	consolidatedSignature := getConfigSignature(consolidatedView)
-	glog.V(7).Infof("Consolidated view:\n%s", consolidatedSignature)
-	for addr, nodeinfos := range c.Infos {
-		nodesView := append(nodeinfos.Friends, nodeinfos.Node).SortByFunc(LessByID)
-		nodeSignature := getConfigSignature(nodesView)
-		glog.V(7).Infof("Node view from %s (ID: %s):\n%s", addr, nodeinfos.Node.ID, nodeSignature)
-		if !reflect.DeepEqual(consolidatedSignature, nodeSignature) {
-			glog.V(4).Info("Temporary inconsistency between nodes is possible. If the following inconsistency message persists for more than 20 mins, any cluster operation (scale, rolling update) should be avoided before the message is gone")
-			glog.V(4).Infof("Inconsistency from %s: \n%s\nVS\n%s", addr, consolidatedSignature, nodeSignature)
-			c.Status = ClusterInfosInconsistent
+		consolidatedView := c.GetNodes().SortByFunc(LessByID)
+		consolidatedSignature := getConfigSignature(consolidatedView)
+		glog.V(7).Infof("Consolidated view:\n%s", consolidatedSignature)
+		for addr, nodeinfos := range c.Infos {
+			nodesView := append(nodeinfos.Friends, nodeinfos.Node).SortByFunc(LessByID)
+			nodeSignature := getConfigSignature(nodesView)
+			glog.V(7).Infof("Node view from %s (ID: %s):\n%s", addr, nodeinfos.Node.ID, nodeSignature)
+			if !reflect.DeepEqual(consolidatedSignature, nodeSignature) {
+				glog.V(4).Info("Temporary inconsistency between nodes is possible. If the following inconsistency message persists for more than 20 mins, any cluster operation (scale, rolling update) should be avoided before the message is gone")
+				glog.V(4).Infof("Inconsistency from %s: \n%s\nVS\n%s", addr, consolidatedSignature, nodeSignature)
+				c.Status = ClusterInfosInconsistent
+			}
 		}
-	}
-	if c.Status == ClusterInfosUnset {
-		c.Status = ClusterInfosConsistent
-		consistencyStatus = true
-	}
-	return consistencyStatus*/
+		if c.Status == ClusterInfosUnset {
+			c.Status = ClusterInfosConsistent
+			consistencyStatus = true
+		}
+		return consistencyStatus*/
 }
-

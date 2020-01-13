@@ -63,7 +63,7 @@ type AdminOptions struct {
 // Admin wraps redis cluster admin logic
 type Admin struct {
 	///hashMaxSlots Slot
-	cnx          AdminConnectionsInterface
+	cnx AdminConnectionsInterface
 }
 
 func (a Admin) Connections() AdminConnectionsInterface {
@@ -151,43 +151,43 @@ func NewAdmin(addrs []string, options *AdminOptions) AdminInterface {
 
 func (a *Admin) getInfos(c ClientInterface, addr string) (*NodeInfos, error) {
 	/*
-	resp := c.Cmd("CLUSTER", "NODES")
-	if err := a.Connections().ValidateResp(resp, addr, "Unable to retrieve Node Info"); err != nil {
-		return nil, err
-	}
+		resp := c.Cmd("CLUSTER", "NODES")
+		if err := a.Connections().ValidateResp(resp, addr, "Unable to retrieve Node Info"); err != nil {
+			return nil, err
+		}
 
-	var raw string
-	var err error
-	raw, err = resp.Str()
+		var raw string
+		var err error
+		raw, err = resp.Str()
 
-	if err != nil {
-		return nil, fmt.Errorf("Wrong format from CLUSTER NODES: %v", err)
-	}
-*/
+		if err != nil {
+			return nil, fmt.Errorf("Wrong format from CLUSTER NODES: %v", err)
+		}
+	*/
 	var raw string = ""
 	nodeInfos := DecodeNodeInfos(&raw, addr)
 
 	/*
-	if glog.V(3) {
-		//Retrieve server info for debugging
-		resp = c.Cmd("INFO", "SERVER")
-		if err = a.Connections().ValidateResp(resp, addr, "Unable to retrieve Node Info"); err != nil {
-			return nil, err
-		}
-		raw, err = resp.Str()
-		if err != nil {
-			return nil, fmt.Errorf("Wrong format from INFO SERVER: %v", err)
-		}
+		if glog.V(3) {
+			//Retrieve server info for debugging
+			resp = c.Cmd("INFO", "SERVER")
+			if err = a.Connections().ValidateResp(resp, addr, "Unable to retrieve Node Info"); err != nil {
+				return nil, err
+			}
+			raw, err = resp.Str()
+			if err != nil {
+				return nil, fmt.Errorf("Wrong format from INFO SERVER: %v", err)
+			}
 
-		var serverStartTime time.Time
-		serverStartTime, err = DecodeNodeStartTime(&raw)
+			var serverStartTime time.Time
+			serverStartTime, err = DecodeNodeStartTime(&raw)
 
-		if err != nil {
-			return nil, err
-		}
+			if err != nil {
+				return nil, err
+			}
 
-		nodeInfos.Node.ServerStartTime = serverStartTime
-	}*/
+			nodeInfos.Node.ServerStartTime = serverStartTime
+		}*/
 
 	return nodeInfos, nil
 }

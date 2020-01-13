@@ -19,16 +19,16 @@ const (
 
 // Node Represent a Redis Node
 type Node struct {
-	ID              string
-	IP              string
-	Port            string
-	Role            string
-	LinkState       string
-	MasterReferent  string
-	FailStatus      []string
-	PingSent        int64
-	PongRecv        int64
-	ConfigEpoch     int64
+	ID             string
+	IP             string
+	Port           string
+	Role           string
+	LinkState      string
+	MasterReferent string
+	FailStatus     []string
+	PingSent       int64
+	PongRecv       int64
+	ConfigEpoch    int64
 	///Slots           []Slot
 	///MigratingSlots  map[Slot]string
 	///ImportingSlots  map[Slot]string
@@ -40,7 +40,7 @@ type Node struct {
 // NewDefaultNode builds and returns new defaultNode instance
 func NewDefaultNode() *Node {
 	return &Node{
-		Port:           DefaultRedisPort,
+		Port: DefaultRedisPort,
 		///Slots:          []Slot{},
 		///MigratingSlots: map[Slot]string{},
 		///ImportingSlots: map[Slot]string{},

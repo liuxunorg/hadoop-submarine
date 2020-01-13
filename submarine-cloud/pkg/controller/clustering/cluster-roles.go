@@ -26,4 +26,3 @@ func AttachingSlavesToMaster(cluster *submarine.Cluster, admin submarine.AdminIn
 	}
 	return globalErr
 }
-

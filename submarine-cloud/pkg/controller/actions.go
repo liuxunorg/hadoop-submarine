@@ -1,11 +1,11 @@
 package controller
 
 import (
+	rapi "github.com/apache/submarine/submarine-cloud/pkg/apis/submarine/v1alpha1"
 	"github.com/apache/submarine/submarine-cloud/pkg/controller/clustering"
 	"github.com/apache/submarine/submarine-cloud/pkg/controller/sanitycheck"
-	"github.com/golang/glog"
-	rapi "github.com/apache/submarine/submarine-cloud/pkg/apis/submarine/v1alpha1"
 	"github.com/apache/submarine/submarine-cloud/pkg/submarine"
+	"github.com/golang/glog"
 	"time"
 )
 

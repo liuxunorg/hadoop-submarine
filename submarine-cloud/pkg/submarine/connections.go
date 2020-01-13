@@ -89,6 +89,7 @@ func (cnx *AdminConnections) Update(addr string) (ClientInterface, error) {
 	}
 	return c, err
 }
+
 func (cnx *AdminConnections) connect(addr string) (ClientInterface, error) {
 	c, err := NewClient(addr, cnx.connectionTimeout, cnx.commandsMapping)
 	if err != nil {
@@ -101,7 +102,6 @@ func (cnx *AdminConnections) connect(addr string) (ClientInterface, error) {
 
 	return c, nil
 }
-
 
 // AddAll connect to the given list of addresses and
 // register them in the map
@@ -174,7 +174,6 @@ func (cnx *AdminConnections) Reset() {
 	cnx.clients = map[string]ClientInterface{}
 }
 
-
 // Remove disconnect and remove the client connection from the map
 func (cnx *AdminConnections) Remove(addr string) {
 	if c, ok := cnx.clients[addr]; ok {
@@ -241,7 +240,6 @@ func (cnx *AdminConnections) GetDifferentFrom(addr string) (ClientInterface, err
 	}
 }
 
-
 // GetAll returns a map of all clients per address
 func (cnx *AdminConnections) GetAll() map[string]ClientInterface {
 	return cnx.clients
@@ -257,7 +255,6 @@ func (cnx *AdminConnections) GetSelected(addrs []string) map[string]ClientInterf
 	}
 	return clientsSelected
 }
-
 
 // Reconnect force a reconnection on the given address
 // is the adress is not part of the map, act like Add

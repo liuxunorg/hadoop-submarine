@@ -3,10 +3,10 @@ package controller
 import (
 	"reflect"
 
-	"github.com/golang/glog"
-	kapi "k8s.io/api/core/v1"
 	rapi "github.com/apache/submarine/submarine-cloud/pkg/apis/submarine/v1alpha1"
 	podctrl "github.com/apache/submarine/submarine-cloud/pkg/controller/pod"
+	"github.com/golang/glog"
+	kapi "k8s.io/api/core/v1"
 )
 
 // Divide pods for lost and other
@@ -132,35 +132,35 @@ func compareNodes(nodeA, nodeB *rapi.SubmarineClusterNode) bool {
 
 func needClusterOperation(cluster *rapi.SubmarineCluster) bool {
 	/*
-	if needRollingUpdate(cluster) {
-		glog.V(6).Info("needClusterOperation---needRollingUpdate")
-		return true
-	}
+		if needRollingUpdate(cluster) {
+			glog.V(6).Info("needClusterOperation---needRollingUpdate")
+			return true
+		}
 
-	if needMorePods(cluster) {
-		glog.V(6).Info("needClusterOperation---needMorePods")
-		return true
-	}
+		if needMorePods(cluster) {
+			glog.V(6).Info("needClusterOperation---needMorePods")
+			return true
+		}
 
-	if needLessPods(cluster) {
-		glog.Info("needClusterOperation---needLessPods")
-		return true
-	}
+		if needLessPods(cluster) {
+			glog.Info("needClusterOperation---needLessPods")
+			return true
+		}
 
-	if compareIntValue("NumberOfMaster", &cluster.Status.Cluster.NumberOfMaster, cluster.Spec.NumberOfMaster) {
-		glog.V(6).Info("needClusterOperation---NumberOfMaster")
-		return true
-	}
+		if compareIntValue("NumberOfMaster", &cluster.Status.Cluster.NumberOfMaster, cluster.Spec.NumberOfMaster) {
+			glog.V(6).Info("needClusterOperation---NumberOfMaster")
+			return true
+		}
 
-	if compareIntValue("MinReplicationFactor", &cluster.Status.Cluster.MinReplicationFactor, cluster.Spec.ReplicationFactor) {
-		glog.V(6).Info("needClusterOperation---MinReplicationFactor")
-		return true
-	}
+		if compareIntValue("MinReplicationFactor", &cluster.Status.Cluster.MinReplicationFactor, cluster.Spec.ReplicationFactor) {
+			glog.V(6).Info("needClusterOperation---MinReplicationFactor")
+			return true
+		}
 
-	if compareIntValue("MaxReplicationFactor", &cluster.Status.Cluster.MaxReplicationFactor, cluster.Spec.ReplicationFactor) {
-		glog.V(6).Info("needClusterOperation---MaxReplicationFactor")
-		return true
-	}*/
+		if compareIntValue("MaxReplicationFactor", &cluster.Status.Cluster.MaxReplicationFactor, cluster.Spec.ReplicationFactor) {
+			glog.V(6).Info("needClusterOperation---MaxReplicationFactor")
+			return true
+		}*/
 
 	return false
 }
@@ -225,4 +225,3 @@ func comparePodSpecMD5Hash(hash string, pod *kapi.Pod) bool {
 
 	return true
 }
-

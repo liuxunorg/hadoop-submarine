@@ -25,7 +25,7 @@ else
   PWD=$(dirname ${BASH_SOURCE-$0})
 fi
 export MINI_PATH=$(cd "${PWD}">/dev/null; pwd)
-SUBMARINE_PROJECT_PATH=${MINI_PATH}/../..
+SUBMARINE_HOME=${MINI_PATH}/../..
 
 download_package() {
   if [ -f "$1" ]; then
@@ -45,7 +45,7 @@ download_package() {
 }
 
 is_empty_dir(){
-    return `ls -A $1|wc -w`
+  return `ls -A $1|wc -w`
 }
 
 # download hadoop
@@ -55,26 +55,26 @@ download_package "spark-${spark_v}-bin-hadoop2.7.tgz" "http://mirrors.tuna.tsing
 # download zookeeper
 download_package "zookeeper-3.4.14.tar.gz" "http://mirror.bit.edu.cn/apache/zookeeper/zookeeper-3.4.14"
 
-if [ ! -d "${SUBMARINE_PROJECT_PATH}/submarine-dist/target" ]; then
-  mkdir "${SUBMARINE_PROJECT_PATH}/submarine-dist/target"
+if [ ! -d "${SUBMARINE_HOME}/submarine-dist/target" ]; then
+  mkdir "${SUBMARINE_HOME}/submarine-dist/target"
 fi
-submarine_dist_exists=$(find -L "${SUBMARINE_PROJECT_PATH}/submarine-dist/target" -name "submarine-dist-${submarine_v}*.tar.gz")
+submarine_dist_exists=$(find -L "${SUBMARINE_HOME}/submarine-dist/target" -name "submarine-dist-${submarine_v}*.tar.gz")
 # Build source code if the package doesn't exist.
 if [[ -z "${submarine_dist_exists}" ]]; then
   # update tony code
-  if is_empty_dir "${SUBMARINE_PROJECT_PATH}/submodules/tony" ]; then
+  if is_empty_dir "${SUBMARINE_HOME}/submodules/tony" ]; then
     git submodule update --init --recursive
   else
     git submodule update --recursive
   fi
 
-  cd "${SUBMARINE_PROJECT_PATH}"
+  cd "${SUBMARINE_HOME}"
   mvn clean package -DskipTests
 fi
 
-cp ${SUBMARINE_PROJECT_PATH}/submarine-dist/target/submarine-dist-${submarine_v}*.tar.gz ${MINI_PATH}
-cp -r ${SUBMARINE_PROJECT_PATH}/submarine-sdk/pysubmarine ${MINI_PATH}
-cp -r ${SUBMARINE_PROJECT_PATH}/docs/database ${MINI_PATH}
+cp ${SUBMARINE_HOME}/submarine-dist/target/submarine-dist-${submarine_v}*.tar.gz ${MINI_PATH}
+cp -r ${SUBMARINE_HOME}/submarine-sdk/pysubmarine ${MINI_PATH}
+cp -r ${SUBMARINE_HOME}/docs/database ${MINI_PATH}
 
 # build image
 echo "Start building the mini-submarine docker image..."
