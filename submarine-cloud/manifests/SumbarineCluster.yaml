@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-apiVersion: "redisoperator.k8s.io/v1alpha1"
+apiVersion: "submarinecluster.k8s.io/v1alpha1"
 kind: SubmarineCluster
 metadata:
   name: cluster-test
@@ -34,7 +34,7 @@ spec:
           emptyDir: {}
       containers:
         - name: redis
-          image: "redisoperator/redisnode:latest"
+          image: "apache/submarine:submarine-0.3.0-SNAPSHOT"
           args: ["--v=6",
                  "--logtostderr=true",
                  "--alsologtostderr=true",
