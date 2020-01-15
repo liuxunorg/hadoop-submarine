@@ -65,7 +65,11 @@ func NewSubmarineClusterControl(lister corev1listers.PodLister, client clientset
 // GetSubmarineClusterPods return list of Pod attached to a SubmarineCluster
 func (p *SubmarineClusterControl) GetSubmarineClusterPods(submarineCluster *rapi.SubmarineCluster) ([]*kapiv1.Pod, error) {
 	glog.Infof("GetSubmarineClusterPods()")
-	return nil, nil
+	selector, err := CreateRedisClusterLabelSelector(submarineCluster)
+	if err != nil {
+		return nil, err
+	}
+	return p.PodLister.Pods(submarineCluster.Namespace).List(selector)
 }
 
 // CreatePod used to create a Pod from the SubmarineCluster pod template

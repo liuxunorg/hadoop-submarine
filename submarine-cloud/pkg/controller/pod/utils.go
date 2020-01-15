@@ -41,6 +41,15 @@ func GetLabelsSet(rediscluster *sapi.SubmarineCluster) (labels.Set, error) {
 	return desiredLabels, nil
 }
 
+// CreateRedisClusterLabelSelector creates label selector to select the jobs related to a rediscluster, stepName
+func CreateRedisClusterLabelSelector(rediscluster *sapi.SubmarineCluster) (labels.Selector, error) {
+	set, err := GetLabelsSet(rediscluster)
+	if err != nil {
+		return nil, err
+	}
+	return labels.SelectorFromSet(set), nil
+}
+
 // GetAnnotationsSet return a labels.Set of annotation from the RedisCluster
 func GetAnnotationsSet(rediscluster *sapi.SubmarineCluster) (labels.Set, error) {
 	desiredAnnotations := make(labels.Set)

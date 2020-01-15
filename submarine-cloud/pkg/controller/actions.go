@@ -3,7 +3,6 @@ package controller
 import (
 	rapi "github.com/apache/submarine/submarine-cloud/pkg/apis/submarine/v1alpha1"
 	"github.com/apache/submarine/submarine-cloud/pkg/controller/clustering"
-	"github.com/apache/submarine/submarine-cloud/pkg/controller/sanitycheck"
 	"github.com/apache/submarine/submarine-cloud/pkg/submarine"
 	"github.com/golang/glog"
 	"time"
@@ -11,8 +10,9 @@ import (
 
 // Perform various management operations on Redis Pod and Redis clusters to approximate the desired state
 func (c *Controller) clusterAction(admin submarine.AdminInterface, cluster *rapi.SubmarineCluster, infos *submarine.ClusterInfos) (bool, error) {
+	glog.Info("clusterAction()")
 	var err error
-	// run sanity check if needed
+	/* run sanity check if needed
 	needSanity, err := sanitycheck.RunSanityChecks(admin, &c.config.submarine, c.podControl, cluster, infos, true)
 	if err != nil {
 		glog.Errorf("[clusterAction] cluster %s/%s, an error occurs during sanitycheck: %v ", cluster.Namespace, cluster.Name, err)
@@ -21,7 +21,7 @@ func (c *Controller) clusterAction(admin submarine.AdminInterface, cluster *rapi
 	if needSanity {
 		glog.V(3).Infof("[clusterAction] run sanitycheck cluster: %s/%s", cluster.Namespace, cluster.Name)
 		return sanitycheck.RunSanityChecks(admin, &c.config.submarine, c.podControl, cluster, infos, false)
-	}
+	}*/
 
 	// Start more pods in needed
 	if needMorePods(cluster) {
@@ -57,7 +57,7 @@ func (c *Controller) clusterAction(admin submarine.AdminInterface, cluster *rapi
 		return true, nil
 	}
 
-	glog.V(6).Infof("[clusterAction] cluster hasn't changed cluster: %s/%s", cluster.Namespace, cluster.Name)
+	glog.Infof("[clusterAction] cluster hasn't changed cluster: %s/%s", cluster.Namespace, cluster.Name)
 	return false, nil
 }
 
@@ -65,8 +65,8 @@ func (c *Controller) clusterAction(admin submarine.AdminInterface, cluster *rapi
 // - add or delete pods
 // - configure the redis-server process
 func (c *Controller) applyConfiguration(admin submarine.AdminInterface, cluster *rapi.SubmarineCluster) (bool, error) {
-	glog.V(6).Info("applyConfiguration START")
-	defer glog.V(6).Info("applyConfiguration STOP")
+	glog.Info("applyConfiguration START")
+	defer glog.Info("applyConfiguration STOP")
 
 	asChanged := false
 

@@ -224,8 +224,8 @@ func (c *Controller) sync(key string) (bool, error) {
 }
 
 func (c *Controller) syncCluster(submarineCluster *rapi.SubmarineCluster) (forceRequeue bool, err error) {
-	glog.V(1).Info("syncCluster START")
-	defer glog.V(1).Info("syncCluster STOP")
+	glog.Info("syncCluster START")
+	defer glog.Info("syncCluster STOP")
 	forceRequeue = false
 	redisClusterService, err := c.getRedisClusterService(submarineCluster)
 	if err != nil {
