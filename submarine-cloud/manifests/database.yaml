@@ -1,0 +1,40 @@
+---
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: mysql
+spec:
+  replicas: 1
+  selector:
+    app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+        - image: apache/submarine:database-0.3.0-SNAPSHOT
+          name: mysql
+          resources:
+            limits:
+              cpu: "100m"
+              memory: "200Mi"
+          ports:
+            - containerPort: 3306
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: "password"
+---
+apiVersion: v1
+kind: Service   #对象是Service了哦
+metadata:
+  name: mysql
+spec:
+  ports:
+    - name: mysql-svc         # 端口名称，Service是必须指定端口名称的
+      port: 3306              # Service的端口号
+      targetPort: 3306        # 容器暴露的端口号
+      nodePort: 31112         # node的真实端口号
+  selector:
+    app: mysql       # Service选择了标签为app: myweb的pod
+  type: NodePort

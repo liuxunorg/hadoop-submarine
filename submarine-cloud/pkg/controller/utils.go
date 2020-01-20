@@ -3,6 +3,7 @@ package controller
 import (
 	"errors"
 	"fmt"
+	"github.com/golang/glog"
 	apiv1 "k8s.io/api/core/v1"
 	"net"
 	"time"
@@ -16,6 +17,7 @@ func NewRedisAdmin(pods []*apiv1.Pod, cfg *config.Submarine) (submarine.AdminInt
 	nodesAddrs := []string{}
 	for _, pod := range pods {
 		redisPort := submarine.DefaultRedisPort
+		glog.Info("pod = %v", pod)
 		for _, container := range pod.Spec.Containers {
 			if container.Name == "redis-node" {
 				for _, port := range container.Ports {

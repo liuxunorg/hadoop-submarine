@@ -168,11 +168,11 @@ func needClusterOperation(cluster *rapi.SubmarineCluster) bool {
 func needMorePods(cluster *rapi.SubmarineCluster) bool {
 	// Expected number of Pods depends on replication factor and Master number
 	nbPodNeed := *cluster.Spec.NumberOfMaster * (1 + *cluster.Spec.ReplicationFactor)
-	glog.Info("nbPodNeed=%d, *cluster.Spec.NumberOfMaster=%d, *cluster.Spec.ReplicationFactor=%d", nbPodNeed, *cluster.Spec.NumberOfMaster, *cluster.Spec.ReplicationFactor)
+	glog.Infof("nbPodNeed=%d, *cluster.Spec.NumberOfMaster=%d, *cluster.Spec.ReplicationFactor=%d", nbPodNeed, *cluster.Spec.NumberOfMaster, *cluster.Spec.ReplicationFactor)
 
 	// If not all Pods are ready, do nothing
-	glog.Info("cluster.Status.Cluster.NbPods=%d", cluster.Status.Cluster.NbPods)
-	glog.Info("cluster.Status.Cluster.NbPodsReady=%d", cluster.Status.Cluster.NbPodsReady)
+	glog.Infof("cluster.Status.Cluster.NbPods=%d", cluster.Status.Cluster.NbPods)
+	glog.Infof("cluster.Status.Cluster.NbPodsReady=%d", cluster.Status.Cluster.NbPodsReady)
 	if cluster.Status.Cluster.NbPods != cluster.Status.Cluster.NbPodsReady {
 		return false
 	}

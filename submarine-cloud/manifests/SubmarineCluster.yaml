@@ -21,8 +21,8 @@ metadata:
 spec:
   additionalLabels:
     foo: bar
-  numberOfMaster: 3
-  replicationFactor: 1
+  numberOfMaster: 1
+  replicationFactor: 0
   podTemplate:
     metadata:
       labels:
@@ -33,22 +33,14 @@ spec:
         - name: data
           emptyDir: {}
       containers:
-        - name: redis
+        - name: redis-node
           image: "apache/submarine:server-0.3.0-SNAPSHOT"
-          args: ["--v=6",
-                 "--logtostderr=true",
-                 "--alsologtostderr=true",
-                 "--t=10s",
-                 "--d=10s",
-                 "--cluster-node-timeout=2000",
-                 "--ns=$(POD_NAMESPACE)",
-                 "--ip=$(POD_IP)",
-                 "--rs=cluster-test"]
+          args: []
           imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 6379
+            - containerPort: 8080
               name:  redis
-            - containerPort: 16379
+            - containerPort: 8081
               name: cluster
           volumeMounts:
             - name: data
@@ -62,20 +54,19 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: status.podIP
-          livenessProbe:
-            httpGet:
-              path: /live
-              port: 8080
-            initialDelaySeconds: 10
-            timeoutSeconds: 5
-            periodSeconds: 10
-            successThreshold: 1
-            failureThreshold: 30
-          readinessProbe:
-            httpGet:
-              path: /ready
-              port: 8080
-            timeoutSeconds: 5
-            periodSeconds: 10
-            successThreshold: 1
-            failureThreshold: 3
+---
+apiVersion: v1
+kind: Service   #对象是Service了哦
+metadata:
+  name: myweb
+spec:
+  ports:
+    - name: myweb-svc         # 端口名称，Service是必须指定端口名称的
+      port: 8080              # Service的端口号
+      targetPort: 8080        # 容器暴露的端口号
+      nodePort: 31111         # node的真实端口号
+  selector:
+    app: cluster-test       # Service选择了标签为app: myweb的pod
+  type: NodePort
+
+# kubectl port-forward svc/myweb 8080:8080 --address 0.0.0.0

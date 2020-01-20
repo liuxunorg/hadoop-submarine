@@ -10,7 +10,7 @@ import (
 
 const (
 	// DefaultRedisPort define the default Redis Port
-	DefaultRedisPort = "6379"
+	DefaultRedisPort = "8080"
 	// RedisMasterRole redis role master
 	redisMasterRole = "master"
 	// RedisSlaveRole redis role slave
