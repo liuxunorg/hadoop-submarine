@@ -16,6 +16,6 @@
 FROM alpine:3.10
 
 RUN apk add tzdata --no-cache
-ADD bin/submarine-operator /usr/local/bin/submarine-operator
+ADD ./tmp/submarine-operator /usr/local/bin/submarine-operator
 
-ENTRYPOINT [ "/usr/local/bin/submarine-operator" ]
+ENTRYPOINT [ "/usr/local/bin/submarine-operator --kubeconfig=$KUBECONFIG --alsologtostderr --v=7" ]
