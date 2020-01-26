@@ -56,7 +56,7 @@ spec:
                   fieldPath: status.podIP
           livenessProbe:
             httpGet:
-              path: /v1/cluster/address
+              path: /api/v1/cluster/address
               port: 8080
             initialDelaySeconds: 10
             timeoutSeconds: 5
@@ -65,7 +65,7 @@ spec:
             failureThreshold: 30
           readinessProbe:
             httpGet:
-              path: /v1/cluster/address
+              path: /api/v1/cluster/address
               port: 8080
             timeoutSeconds: 5
             periodSeconds: 10
@@ -74,17 +74,17 @@ spec:
 
 ---
 apiVersion: v1
-kind: Service   #对象是Service了哦
+kind: Service
 metadata:
   name: myweb
 spec:
   ports:
-    - name: myweb-svc         # 端口名称，Service是必须指定端口名称的
-      port: 8080              # Service的端口号
-      targetPort: 8080        # 容器暴露的端口号
-      nodePort: 31111         # node的真实端口号
+    - name: myweb-svc
+      port: 8080
+      targetPort: 8080
+      nodePort: 30001
   selector:
-    app: cluster-test       # Service选择了标签为app: myweb的pod
+    app: cluster-test
   type: NodePort
 
 # kubectl port-forward svc/myweb 8080:8080 --address 0.0.0.0

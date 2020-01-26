@@ -14,35 +14,30 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-apiVersion: v1
-kind: List
-items:
-  - apiVersion: rbac.authorization.k8s.io/v1beta1
-    kind: ClusterRole
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: submarine-operator
+  namespace: default
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
     metadata:
-      name: redis-node
-    rules:
-      - apiGroups: [""]
-        resources:
-          - namespaces
-          - services
-          - endpoints
-          - pods
-        verbs: ["list", "get"]
-  - apiVersion: rbac.authorization.k8s.io/v1beta1
-    kind: ClusterRoleBinding
-    metadata:
-      name: redis-node-default
-    roleRef:
-      apiGroup: rbac.authorization.k8s.io
-      kind: ClusterRole
-      name: redis-node
-    subjects:
-      - kind: ServiceAccount
-        name: redis-node
-        namespace: default
-    # The SA for the redis operator
-  - apiVersion: v1
-    kind: ServiceAccount
-    metadata:
-      name: "redis-node"
+      labels:
+        app: "submarine-operator"
+    spec:
+      serviceAccountName: "redis-operator"
+      containers:
+        - name: op
+          image: "apache/submarine:operator-0.3.0-SNAPSHOT"
+          imagePullPolicy: IfNotPresent
+          args: ["--v=7", "--logtostderr=true", "--alsologtostderr"]
+          resources:
+            limits:
+              cpu: 100m
+              memory: 128Mi
+            requests:
+              cpu: 100m
+              memory: 128Mi
