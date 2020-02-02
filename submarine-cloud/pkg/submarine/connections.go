@@ -107,6 +107,7 @@ func (cnx *AdminConnections) Update(addr string) (ClientInterface, error) {
 }
 
 func (cnx *AdminConnections) connect(addr string) (ClientInterface, error) {
+	glog.Infof("connect(%s)", addr)
 	c, err := NewClient(addr, cnx.connectionTimeout, cnx.commandsMapping)
 	if err != nil {
 		return nil, err

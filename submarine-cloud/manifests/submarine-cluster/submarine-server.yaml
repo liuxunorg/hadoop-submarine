@@ -21,7 +21,7 @@ metadata:
 spec:
   additionalLabels:
     foo: bar
-  numberOfMaster: 1
+  numberOfMaster: 3
   replicationFactor: 0
   podTemplate:
     metadata:
@@ -86,12 +86,23 @@ spec:
 kind: Service
 apiVersion: v1
 metadata:
-  name: submarine-svc
+  name: submarine-workbench
 spec:
   selector:
     app: cluster-test
   ports:
     - port: 8080
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: submarine-cluster
+spec:
+  selector:
+    app: cluster-test
+  ports:
+    - port: 8081
 
 ---
 apiVersion: extensions/v1beta1
@@ -106,7 +117,7 @@ spec:
         paths:
           - path: /
             backend:
-              serviceName: submarine-svc
+              serviceName: submarine-workbench
               servicePort: 8080
 
 ---

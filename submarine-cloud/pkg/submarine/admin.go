@@ -17,6 +17,7 @@
 package submarine
 
 import (
+	"fmt"
 	"github.com/golang/glog"
 	"time"
 )
@@ -166,6 +167,11 @@ func NewAdmin(addrs []string, options *AdminOptions) AdminInterface {
 }
 
 func (a *Admin) getInfos(c ClientInterface, addr string) (*NodeInfos, error) {
+	_, err := c.GetClusterNodes()
+	if err != nil {
+		return nil, fmt.Errorf("Wrong format from CLUSTER NODES: %v", err)
+	}
+
 	/*
 		resp := c.Cmd("CLUSTER", "NODES")
 		if err := a.Connections().ValidateResp(resp, addr, "Unable to retrieve Node Info"); err != nil {

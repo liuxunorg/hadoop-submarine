@@ -42,7 +42,7 @@
         <version>2.3.4</version>
         <extensions>true</extensions>
         <executions>
-          <execution>
+          <!--execution>
             <id>execution-fmt</id>
             <phase>compile</phase>
             <goals>
@@ -51,7 +51,7 @@
             <configuration>
               <sources>${basedir}</sources>
             </configuration>
-          </execution>
+          </execution-->
           <execution>
             <id>execution-build</id>
             <phase>compile</phase>

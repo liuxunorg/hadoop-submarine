@@ -59,6 +59,7 @@ Mainly prepare the declaration and registration interface of the resource object
 go get -u k8s.io/apimachinery/pkg/apis/meta/v1
 go get -u k8s.io/code-generator/...
 go get -u k8s.io/apiextensions-apiserver/...
+go get -u github.com/go-resty/resty/v2
 ```
 
 ### Automatically generate Client, Informer, WorkQueue related code

@@ -30,13 +30,8 @@ export SUBMARINE_HOME=${CURRENT_PATH}/../../..
 if [ ! -d "${SUBMARINE_HOME}/submarine-cloud/target" ]; then
   mkdir "${SUBMARINE_HOME}/submarine-cloud/target"
 fi
-submarine_operator_exists=$(find -L "${SUBMARINE_HOME}/submarine-cloud/target" -name "submarine-operator_linux")
-# Build source code if the package doesn't exist.
-if [[ -z "${submarine_operator_exists}" ]]; then
-  cd "${SUBMARINE_HOME}/submarine-cloud"
-  export GOOS=linux
-  mvn clean package -DskipTests
-fi
+cd "${SUBMARINE_HOME}/submarine-cloud"
+make release
 
 mkdir -p "${CURRENT_PATH}/tmp"
 cp ${SUBMARINE_HOME}/submarine-cloud/target/submarine-operator_linux "${CURRENT_PATH}/tmp"

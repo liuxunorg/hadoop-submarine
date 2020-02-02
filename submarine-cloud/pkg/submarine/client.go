@@ -17,10 +17,10 @@
 package submarine
 
 import (
-	"bytes"
-	"encoding/json"
+	"errors"
+	"fmt"
+	"github.com/go-resty/resty/v2"
 	"github.com/golang/glog"
-	"io"
 	"net/http"
 	"time"
 )
@@ -46,7 +46,7 @@ type ClientInterface interface {
 	// to be retrieved through PipeResp. The first returned int will be the number
 	// of pending commands dropped, the second will be the number of pending
 	// responses dropped
-	PipeClear() (int, int)
+	///PipeClear() (int, int)
 
 	// ReadResp will read a Resp off of the connection without sending anything
 	// first (useful after you've sent a SUSBSCRIBE command). This will block until
@@ -59,17 +59,24 @@ type ClientInterface interface {
 
 	// GetClusterAddress calls the given Submarine cluster server address list
 	GetClusterAddress() ([]string, error)
+
+	// GetClusterNodes calls the given Submarine cluster node list
+	GetClusterNodes() (string, error)
 }
 
 // Client structure representing a client connection to submarine
 type Client struct {
 	commandsMapping map[string]string
-	///client          *submarine.Client
-	client ClientInterface
+	client          *resty.Client
+	//client ClientInterface
+}
+
+func (c *Client) Close() error {
+	panic("implement me")
 }
 
 const getClusterAddressUrl = "/api/v1/cluster/address"
-const getClusterNodesUrl = "/api/v1/cluster/nodes"
+const ClusterNodesUrl = "/api/v1/cluster/nodes"
 
 // NewClient build a client connection and connect to a submarine address
 func NewClient(addr string, cnxTimeout time.Duration, commandsMapping map[string]string) (ClientInterface, error) {
@@ -78,42 +85,148 @@ func NewClient(addr string, cnxTimeout time.Duration, commandsMapping map[string
 		commandsMapping: commandsMapping,
 	}
 
-	// c.client, err = submarine.DialTimeout("tcp", addr, cnxTimeout)
-	// TODO error!!!!
+	// Create a Resty Client
+	c.client = resty.New()
 
-	return c.client, err
+	// Retries are configured per client
+	c.client.SetHostURL("http://"+addr).
+		// Set retry count to non zero to enable retries
+		SetRetryCount(3).
+		// You can override initial retry wait time.
+		// Default is 100 milliseconds.
+		SetRetryWaitTime(3 * time.Second).
+		// MaxWaitTime can be overridden as well.
+		// Default is 2 seconds.
+		SetRetryMaxWaitTime(10 * time.Second).
+		// SetRetryAfter sets callback to calculate wait time between retries.
+		// Default (nil) implies exponential backoff with jitter
+		SetRetryAfter(func(client *resty.Client, resp *resty.Response) (time.Duration, error) {
+			return 0, errors.New("quota exceeded")
+		}).
+		AddRetryCondition(
+			// RetryConditionFunc type is for retry condition function
+			// input: non-nil Response OR request execution error
+			func(r *resty.Response, err error) bool {
+				return r.StatusCode() == http.StatusTooManyRequests
+			},
+		)
+
+	if err := c.dialTimeout(getClusterAddressUrl); err != nil {
+		return nil, err
+	}
+
+	return c, err
+}
+
+func (c *Client) dialTimeout(url string) error {
+	glog.Infof("dialTimeout(%s)", url)
+
+	resp, err := c.client.R().
+		SetHeader("Accept", "application/json").
+		EnableTrace().
+		Get(url)
+
+	if err != nil || resp.StatusCode() != 200 {
+		// Explore response object
+		fmt.Println("Response Info:")
+		fmt.Println("Error      :", err)
+		fmt.Println("Status Code:", resp.StatusCode())
+		fmt.Println("Status     :", resp.Status())
+		fmt.Println("Time       :", resp.Time())
+		fmt.Println("Received At:", resp.ReceivedAt())
+		fmt.Println("Body       :\n", resp)
+		fmt.Println()
+
+		// Explore trace info
+		fmt.Println("Request Trace Info:")
+		ti := resp.Request.TraceInfo()
+		fmt.Println("DNSLookup    :", ti.DNSLookup)
+		fmt.Println("ConnTime     :", ti.ConnTime)
+		fmt.Println("TLSHandshake :", ti.TLSHandshake)
+		fmt.Println("ServerTime   :", ti.ServerTime)
+		fmt.Println("ResponseTime :", ti.ResponseTime)
+		fmt.Println("TotalTime    :", ti.TotalTime)
+		fmt.Println("IsConnReused :", ti.IsConnReused)
+		fmt.Println("IsConnWasIdle:", ti.IsConnWasIdle)
+		fmt.Println("ConnIdleTime :", ti.ConnIdleTime)
+
+		return err
+	}
+	return nil
 }
 
 // GetClusterAddress calls the given Submarine cluster server address list.
-func (c *Client) GetClusterAddress(host string) ([]string, error) {
-	clusterAddrBuff := httpGet(host + getClusterAddressUrl)
+func (c *Client) GetClusterAddress() ([]string, error) {
 	var clusterAddress []string
-	err := json.Unmarshal(clusterAddrBuff.Bytes(), &clusterAddress)
+	resp, err := c.client.R().
+		SetHeader("Accept", "application/json").
+		EnableTrace().
+		Get(getClusterAddressUrl)
 	if err != nil {
-		glog.Error("Unmarshal failure: %s", clusterAddrBuff.String())
+		return nil, err
 	}
+
+	glog.Infof("resp.Body() = %v", resp.Body())
 
 	return clusterAddress, nil
 }
 
-func httpGet(url string) *bytes.Buffer {
-	client := &http.Client{Timeout: 5 * time.Second}
-	resp, err := client.Get(url)
+// GetClusterAddress calls the given Submarine cluster server address list.
+func (c *Client) GetClusterNodes() (string, error) {
+	resp, err := c.client.R().
+		SetHeader("Accept", "application/json").
+		EnableTrace().
+		Get(ClusterNodesUrl)
 	if err != nil {
-		panic(err)
-	}
-	defer resp.Body.Close()
-	var buffer [4096]byte
-	result := bytes.NewBuffer(nil)
-	for {
-		n, err := resp.Body.Read(buffer[0:])
-		result.Write(buffer[0:n])
-		if err != nil && err == io.EOF {
-			break
-		} else if err != nil {
-			panic(err)
-		}
+		return "", err
 	}
 
-	return result
+	//glog.Infof("clusterAddress = %v", clusterAddress)
+	glog.Infof("resp = %v", resp)
+	glog.Infof("resp.Body() = %v", string(resp.Body()))
+	glog.Infof("resp.String() = %v", resp.String())
+
+	resp.RawBody()
+
+	var strResp = `
+	"{
+		"status": "OK",
+		"code": 200,
+		"success": true,
+		"message": null,
+		"result": [{
+			"NODE_NAME": "node-name1",
+			"properties": {
+				"STATUS": "OFFLINE",
+				"INTP_PROCESS_LIST": ["SubmarineServerClusterTest"],
+				"LATEST_HEARTBEAT": "2020-02-02T17:20:08.546",
+				"SERVER_START_TIME": "2020-02-02T17:20:33.542",
+				"MEMORY_USED / MEMORY_CAPACITY": "44.88GB / 64.00GB = 70.13%",
+				"CPU_USED / CPU_CAPACITY": "0.00 / 12.00 = 0.00%"
+			}
+		},{
+			"NODE_NAME": "node-name2",
+			"properties": {
+				"STATUS": "OFFLINE",
+				"INTP_PROCESS_LIST": ["SubmarineServerClusterTest"],
+				"LATEST_HEARTBEAT": "2020-02-02T17:20:08.546",
+				"SERVER_START_TIME": "2020-02-02T17:20:33.542",
+				"MEMORY_USED / MEMORY_CAPACITY": "44.88GB / 64.00GB = 70.13%",
+				"CPU_USED / CPU_CAPACITY": "0.00 / 12.00 = 0.00%"
+			}
+		},{
+			"NODE_NAME": "node-name3",
+			"properties": {
+				"STATUS": "OFFLINE",
+				"INTP_PROCESS_LIST": ["SubmarineServerClusterTest"],
+				"LATEST_HEARTBEAT": "2020-02-02T17:20:08.546",
+				"SERVER_START_TIME": "2020-02-02T17:20:33.542",
+				"MEMORY_USED / MEMORY_CAPACITY": "44.88GB / 64.00GB = 70.13%",
+				"CPU_USED / CPU_CAPACITY": "0.00 / 12.00 = 0.00%"
+			}
+		}],
+		"attributes": {}
+	}`
+
+	return strResp, nil
 }

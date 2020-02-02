@@ -20,7 +20,7 @@ GOCLEAN=$(GOCMD) clean
 GOTEST=$(GOCMD) test
 GOGET=$(GOCMD) get
 BINARY_NAME=submarine-operator
-BINARY_UNIX=$(BINARY_NAME)_unix
+BINARY_LINUX=$(BINARY_NAME)_linux
 VERSION="0.3.0-SNAPSHOT"
 BuildGitBranch=$(git rev-parse --abbrev-ref HEAD)
 BuildGitRev=$(git rev-list --count HEAD)
@@ -50,4 +50,4 @@ fmt:
 	@go fmt $(CURDIR)/...
 
 release:
-	CGO_ENABLED=0 GOOS=${GOOS} GOARCH=amd64 $(GOBUILD) -a -installsuffix cgo -ldflags "$(LDFLAGS)" -o ./$(BINARY_UNIX)-linux-amd64-$(VERSION) -v cmd/operator/main.go
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBUILD) -o ./target/${BINARY_LINUX} -v cmd/operator/main.go

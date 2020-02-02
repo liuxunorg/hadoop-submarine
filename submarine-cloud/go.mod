@@ -5,12 +5,14 @@ module github.com/apache/submarine/submarine-cloud
 go 1.12
 
 require (
+	github.com/go-resty/resty/v2 v2.1.0
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
 	github.com/heptiolabs/healthcheck v0.0.0-20180807145615-6ff867650f40
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.5.0
+	golang.org/x/net v0.0.0-20200114155413-6afb5195e5aa // indirect
 	k8s.io/api v0.17.0
 	k8s.io/apiextensions-apiserver v0.17.0
 	k8s.io/apimachinery v0.17.0
@@ -19,6 +21,7 @@ require (
 )
 
 replace (
+	github.com/go-resty/resty/v2 => github.com/go-resty/resty/v2 v2.1.0
 	golang.org/x/sys => golang.org/x/sys v0.0.0-20190813064441-fde4db37ae7a // pinned to release-branch.go1.13
 	golang.org/x/tools => golang.org/x/tools v0.0.0-20190821162956-65e3620a7ae7 // pinned to release-branch.go1.13
 	k8s.io/api => k8s.io/api v0.0.0-20191121015604-11707872ac1c

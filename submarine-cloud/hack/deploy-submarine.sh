@@ -54,7 +54,7 @@ function install_submarine() {
     fi
     kubectl create configmap --namespace default submarine-config --from-file=${ROOT}/hack/conf/submarine-site.xml --from-file=${ROOT}/hack/conf/log4j.properties
 
-    docker pull apache/submarine:operator-0.3.0-SNAPSHOT
+    # docker pull apache/submarine:operator-0.3.0-SNAPSHOT
     kind load docker-image apache/submarine:operator-0.3.0-SNAPSHOT
     kubectl apply -f $ROOT/manifests/submarine-operator/
 
