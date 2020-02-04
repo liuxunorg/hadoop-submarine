@@ -21,7 +21,7 @@ metadata:
 spec:
   additionalLabels:
     foo: bar
-  numberOfMaster: 3
+  numberOfMaster: 1
   replicationFactor: 0
   podTemplate:
     metadata:
@@ -48,23 +48,6 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: status.podIP
-          livenessProbe:
-            httpGet:
-              path: /api/v1/cluster/address
-              port: 8080
-            initialDelaySeconds: 10
-            timeoutSeconds: 5
-            periodSeconds: 10
-            successThreshold: 1
-            failureThreshold: 30
-          readinessProbe:
-            httpGet:
-              path: /api/v1/cluster/address
-              port: 8080
-            timeoutSeconds: 5
-            periodSeconds: 10
-            successThreshold: 1
-            failureThreshold: 3
           volumeMounts:
             - name: submarine-configmap
               mountPath: /opt/submarine-current/conf/submarine-site.xml
@@ -92,17 +75,46 @@ spec:
     app: cluster-test
   ports:
     - port: 8080
+      targetPort: 8080
 
 ---
 kind: Service
 apiVersion: v1
 metadata:
-  name: submarine-cluster
+  name: submarine-cluster1
 spec:
   selector:
-    app: cluster-test
+    node: "1"
   ports:
     - port: 8081
+      targetPort: 8081
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: submarine-cluster2
+spec:
+  selector:
+    node: "2"
+  ports:
+    - port: 8081
+      targetPort: 8081
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: submarine-cluster3
+spec:
+  selector:
+    node: "3"
+  ports:
+    - port: 8081
+      targetPort: 8081
+
+# kubectl label pods submarinecluster-submarine-test-g497p node=1
+# netstat -tunlp
 
 ---
 apiVersion: extensions/v1beta1
@@ -122,4 +134,4 @@ spec:
 
 ---
 # You can also access the submarine workbench via port-forward
-# kubectl port-forward svc/submarine-svc 18080:8080 --address 0.0.0.0
+# kubectl port-forward svc/submarine-workbench 18080:8080 --address 0.0.0.0

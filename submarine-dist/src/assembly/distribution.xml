@@ -91,7 +91,7 @@
       <directory>../submarine-commons/commons-cluster/target</directory>
       <outputDirectory>/lib</outputDirectory>
       <includes>
-        <include>submarine-commons-cluster-${project.version}.jar</include>
+        <include>submarine-commons-cluster-${project.version}-shade.jar</include>
       </includes>
     </fileSet>
     <fileSet>
@@ -152,6 +152,10 @@
         <exclude>commons-runtime-${project.version}.jar</exclude>
         <exclude>commons-cluster-${project.version}.jar</exclude>
         <exclude>commons-rpc-${project.version}.jar</exclude>
+        <exclude>commons-metastore-${project.version}.jar</exclude>
+        <!-- atomix & netty already shade in submarine-commons-cluster-${project.version}-shade.jar -->
+        <exclude>atomix-*.jar</exclude>
+        <exclude>netty-*.jar</exclude>
         <exclude>grpc-*.jar</exclude>
         <exclude>protobuf-java*.jar</exclude>
         <!-- mysql-connector-java uses the GPL license. So we need exclude mysql-connector-java jar -->

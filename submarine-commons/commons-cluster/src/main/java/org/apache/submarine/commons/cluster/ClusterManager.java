@@ -19,6 +19,7 @@ package org.apache.submarine.commons.cluster;
 import com.google.common.collect.Maps;
 import io.atomix.cluster.MemberId;
 import io.atomix.cluster.Node;
+import io.atomix.cluster.messaging.MessagingConfig;
 import io.atomix.cluster.messaging.MessagingService;
 import io.atomix.cluster.messaging.impl.NettyMessagingService;
 import io.atomix.primitive.operation.OperationType;
@@ -155,7 +156,7 @@ public abstract class ClusterManager {
     try {
       this.serverHost = NetworkUtils.findAvailableHostAddress();
       String clusterAddr = sconf.getClusterAddress();
-      LOG.info(this.getClass().toString() + "::clusterAddr = {}", clusterAddr);
+      LOG.info("clusterAddr = {}", clusterAddr);
       if (!StringUtils.isEmpty(clusterAddr)) {
         String cluster[] = clusterAddr.split(",");
 
@@ -163,9 +164,7 @@ public abstract class ClusterManager {
           String[] parts = cluster[i].split(":");
           String clusterHost = parts[0];
           int clusterPort = Integer.valueOf(parts[1]);
-          if (this.serverHost.equalsIgnoreCase(clusterHost)) {
-            raftServerPort = clusterPort;
-          }
+          raftServerPort = clusterPort;
 
           String memberId = clusterHost + ":" + clusterPort;
           Address address = Address.from(clusterHost, clusterPort);
@@ -224,7 +223,7 @@ public abstract class ClusterManager {
         raftAddressMap.put(memberId, address);
 
         MessagingService messagingManager
-            = NettyMessagingService.builder().withAddress(address).build().start().join();
+            = new NettyMessagingService("test", address, new MessagingConfig()).start().join();
         RaftClientProtocol protocol = new RaftClientMessagingProtocol(
             messagingManager, protocolSerializer, raftAddressMap::get);
 
@@ -429,6 +428,30 @@ public abstract class ClusterManager {
 
     return clusterMeta;
   }
+
+  protected static final Namespace storageNamespace = Namespace.builder()
+      .register(CloseSessionEntry.class)
+      .register(CommandEntry.class)
+      .register(ConfigurationEntry.class)
+      .register(InitializeEntry.class)
+      .register(KeepAliveEntry.class)
+      .register(MetadataEntry.class)
+      .register(OpenSessionEntry.class)
+      .register(QueryEntry.class)
+      .register(PrimitiveOperation.class)
+      .register(DefaultOperationId.class)
+      .register(OperationType.class)
+      .register(ReadConsistency.class)
+      .register(ArrayList.class)
+      .register(HashSet.class)
+      .register(DefaultRaftMember.class)
+      .register(MemberId.class)
+      .register(RaftMember.Type.class)
+      .register(Instant.class)
+      .register(Configuration.class)
+      .register(byte[].class)
+      .register(long[].class)
+      .build();
 
   protected static final Serializer protocolSerializer = Serializer.using(Namespace.builder()
       .register(OpenSessionRequest.class)

@@ -58,9 +58,9 @@ function install_submarine() {
     kind load docker-image apache/submarine:operator-0.3.0-SNAPSHOT
     kubectl apply -f $ROOT/manifests/submarine-operator/
 
-    docker pull apache/submarine:database-0.3.0-SNAPSHOT
+    #docker pull apache/submarine:database-0.3.0-SNAPSHOT
     kind load docker-image apache/submarine:database-0.3.0-SNAPSHOT
-    docker pull apache/submarine:server-0.3.0-SNAPSHOT
+    #docker pull apache/submarine:server-0.3.0-SNAPSHOT
     kind load docker-image apache/submarine:server-0.3.0-SNAPSHOT
     kubectl apply -f $ROOT/manifests/submarine-cluster/
 
