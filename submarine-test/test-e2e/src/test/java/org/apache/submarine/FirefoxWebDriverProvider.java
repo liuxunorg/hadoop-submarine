@@ -101,10 +101,11 @@ public class FirefoxWebDriverProvider implements WebDriverProvider {
   public WebDriver createWebDriver(String webDriverPath) {
     FirefoxBinary ffox = new FirefoxBinary();
     if ("true".equals(System.getenv("TRAVIS"))) {
+      LOG.debug("run in travis");
       // xvfb is supposed to run with DISPLAY 99
       ffox.setEnvironmentProperty("DISPLAY", ":99");
     }
-    ffox.addCommandLineOptions("--headless");
+    // ffox.addCommandLineOptions("--headless");
 
     FirefoxProfile profile = new FirefoxProfile();
     profile.setPreference("browser.download.folderList", 2);
@@ -125,7 +126,7 @@ public class FirefoxWebDriverProvider implements WebDriverProvider {
     System.setProperty(
         GeckoDriverService.GECKO_DRIVER_EXE_PROPERTY, webDriverPath);
     System.setProperty(
-        FirefoxDriver.SystemProperty.DRIVER_USE_MARIONETTE, "true");
+        FirefoxDriver.SystemProperty.DRIVER_USE_MARIONETTE, "false");
 
     FirefoxOptions firefoxOptions = new FirefoxOptions();
     firefoxOptions.setBinary(ffox);

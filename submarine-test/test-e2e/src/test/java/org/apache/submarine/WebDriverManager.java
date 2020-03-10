@@ -45,15 +45,6 @@ public class WebDriverManager {
 
     if (driver == null) {
       try {
-        WebDriverProvider provide = new ChromeWebDriverProvider();
-        driver = generateWebDriver(provide);
-      } catch (Exception e) {
-        LOG.error("Exception in WebDriverManager while ChromeDriver ", e);
-      }
-    }
-
-    if (driver == null) {
-      try {
         WebDriverProvider provide = new FirefoxWebDriverProvider();
         driver = generateWebDriver(provide);
       } catch (Exception e) {

@@ -114,8 +114,7 @@ matrix:
       jdk: openjdk8
       dist: xenial
       addons:
-        chrome: stable
-        firefox: latest
+        firefox: "31.0"
       env: PROFILE="-Phadoop-2.9" BUILD_FLAG="clean package install -DskipTests" TEST_FLAG="verify -DskipRat -am" TEST_MODULES="-pl org.apache.submarine:submarine-test-e2e" TEST_PROJECTS=""
 
     - name: Test submarine commons-cluster
@@ -204,7 +203,7 @@ matrix:
     #  jdk: "openjdk8"
     #  dist: xenial
     #  env: PYTHON="3" PROFILE="-Phadoop-2.9" BUILD_FLAG="clean package install -DskipTests" TEST_FLAG="test -DskipRat -am" MODULES="-pl ${EXCLUDE_SUBMITTER_K8S},${EXCLUDE_SUBMARINE},${EXCLUDE_WORKBENCH}" TEST_MODULES="-pl $(echo ${EXCLUDE_INTERPRETER} | sed 's/!//g')" TEST_PROJECTS=""
-    
+
     - name: Test submarine workbench-web VUE
       language: node_js
       node_js:
@@ -321,6 +320,8 @@ install:
   - mvn $BUILD_FLAG $MODULES $PROFILE -B
 
 before_script:
+  # https://docs.travis-ci.com/user/gui-and-headless-browsers/#Using-xvfb-to-Run-Tests-That-Require-a-GUI
+  - if [[ -n $TEST_MODULES ]]; then export DISPLAY=:99.0; sh -e /etc/init.d/xvfb start; sleep 3; fi
   # display info log for debugging
   - if [[ -n $TEST_MODULES ]]; then echo "MAVEN_OPTS='-Xms1024M -Xmx2048M -XX:MaxPermSize=1024m -XX:-UseGCOverheadLimit -Dorg.slf4j.simpleLogger.defaultLogLevel=info'" > ~/.mavenrc; fi
 
