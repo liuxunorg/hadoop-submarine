@@ -23,13 +23,17 @@ import org.apache.submarine.server.rpc.SubmarineRpcServer;
 import org.apache.submarine.server.workbench.websocket.NotebookServer;
 import org.apache.submarine.commons.cluster.ClusterServer;
 import org.eclipse.jetty.http.HttpVersion;
+import org.eclipse.jetty.rewrite.handler.RewriteHandler;
+import org.eclipse.jetty.rewrite.handler.RewriteRegexRule;
+import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.SecureRequestCustomizer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.SslConnectionFactory;
-import org.eclipse.jetty.server.handler.ContextHandlerCollection;
+import org.eclipse.jetty.server.handler.DefaultHandler;
+import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -52,6 +56,12 @@ import org.apache.submarine.commons.utils.SubmarineConfVars;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.servlet.DispatcherType;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 
@@ -84,11 +94,10 @@ public class SubmarineServer extends ResourceConfig {
 
     jettyWebServer = setupJettyServer(conf);
 
-    ContextHandlerCollection contexts = new ContextHandlerCollection();
-    jettyWebServer.setHandler(contexts);
-
     // Web UI
-    final WebAppContext webApp = setupWebAppContext(contexts, conf);
+    HandlerList handlers = new HandlerList();
+    final WebAppContext webApp = setupWebAppContext(handlers, conf);
+    jettyWebServer.setHandler(handlers);
 
     // Add
     sharedServiceLocator = ServiceLocatorFactory.getInstance().create("shared-locator");
@@ -127,7 +136,7 @@ public class SubmarineServer extends ResourceConfig {
   private static void startServer() throws InterruptedException {
     LOG.info("Starting submarine server");
     try {
-      jettyWebServer.start(); // Instantiates WorkbenchServer
+      jettyWebServer.start(); // Instantiates SubmarineServer
     } catch (Exception e) {
       LOG.error("Error while running jettyServer", e);
       System.exit(-1);
@@ -162,12 +171,12 @@ public class SubmarineServer extends ResourceConfig {
     webapp.addServlet(servletHolder, "/api/*");
   }
 
-  private static WebAppContext setupWebAppContext(ContextHandlerCollection contexts,
+  private static WebAppContext setupWebAppContext(HandlerList handlers,
       SubmarineConfiguration conf) {
     WebAppContext webApp = new WebAppContext();
     webApp.setContextPath("/");
     File warPath = new File(conf.getString(SubmarineConfVars.ConfVars.WORKBENCH_WEB_WAR));
-    LOG.info("workbench web war file path is {}.", 
+    LOG.info("workbench web war file path is {}.",
         conf.getString(SubmarineConfVars.ConfVars.WORKBENCH_WEB_WAR));
     if (warPath.isDirectory()) {
       // Development mode, read from FS
@@ -183,7 +192,29 @@ public class SubmarineServer extends ResourceConfig {
     }
     // Explicit bind to root
     webApp.addServlet(new ServletHolder(new DefaultServlet()), "/*");
-    contexts.addHandler(webApp);
+
+    // SUBMARINE-422.
+    // Add error page mapping for context
+    // webApp.addServlet(ErrorHandling.class, "/errorpage");
+    // ErrorPageErrorHandler errorMapper = new ErrorPageErrorHandler();
+    // errorMapper.addErrorPage(404, "/");
+    // webApp.setErrorHandler(errorMapper);
+
+    // to handle static resources against base resource (always last) always named "default" (per spec)
+    // ServletHolder defaultHolder = new ServletHolder("default", DefaultServlet.class);
+    // assigned to default url-pattern of "/" (per spec)
+    // webApp.addServlet(defaultHolder, "/");
+
+    RewriteHandler rewriteHandler = new RewriteHandler();
+    rewriteHandler.setRewriteRequestURI(true);
+    rewriteHandler.setRewritePathInfo(false);
+    rewriteHandler.setOriginalPathAttribute("requestedPath");
+    RewriteRegexRule rule = new RewriteRegexRule();
+    rule.setRegex("/workbench/.*");
+    rule.setReplacement("http://127.0.0.1:8080/");
+    rewriteHandler.addRule(rule);
+
+    handlers.setHandlers(new Handler[] { rewriteHandler, webApp, new DefaultHandler() });
 
     return webApp;
   }
@@ -280,4 +311,30 @@ public class SubmarineServer extends ResourceConfig {
     cf.getHttpConfiguration().setRequestHeaderSize(requestHeaderSize);
   }
 
+  public static class ErrorHandling extends HttpServlet {
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+      throws ServletException, IOException {
+      if (req.getDispatcherType() != DispatcherType.ERROR) {
+        // we didn't get here from a error dispatch.
+        // somebody attempted to use this servlet directly.
+        resp.setStatus(404);
+        return;
+      }
+
+      String requestedResource = (String) req.getAttribute(RequestDispatcher.ERROR_REQUEST_URI);
+      LOG.error("[ErrorHandling] Requested resource was " + requestedResource);
+      int statusCode = (int) req.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
+      switch (statusCode) {
+        case 404:
+          // let handle it by a redirect
+          // resp.sendRedirect("/");
+          break;
+        default:
+          // pass the other errors through
+          resp.setStatus(statusCode);
+          break;
+      }
+    }
+  }
 }
