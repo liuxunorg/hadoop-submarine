@@ -37,6 +37,7 @@ import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
@@ -57,13 +58,19 @@ import org.apache.submarine.commons.utils.SubmarineConfVars;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.servlet.DispatcherType;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
+import java.util.EnumSet;
 
 public class SubmarineServer extends ResourceConfig {
   private static final Logger LOG = LoggerFactory.getLogger(SubmarineServer.class);
@@ -211,12 +218,45 @@ public class SubmarineServer extends ResourceConfig {
     rewriteHandler.setOriginalPathAttribute("requestedPath");
     RewriteRegexRule rule = new RewriteRegexRule();
     rule.setRegex("/workbench/.*");
-    rule.setReplacement("http://127.0.0.1:8080/");
+    rule.setReplacement("/");
     rewriteHandler.addRule(rule);
 
-    handlers.setHandlers(new Handler[] { rewriteHandler, webApp, new DefaultHandler() });
+    ServletHandler handler = new ServletHandler();
+    handler.addServletWithMapping(HelloServlet.class, "/workbench/*");
+    handler.addFilterWithMapping(HelloPrintingFilter.class, "/workbench/*",
+        EnumSet.of(DispatcherType.REQUEST));
+
+    handlers.setHandlers(new Handler[] { rewriteHandler, handler, webApp, new DefaultHandler() });
 
     return webApp;
+  }
+
+  public static class HelloServlet extends HttpServlet {
+    private static final long serialVersionUID = 1L;
+
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+      throws ServletException, IOException {
+      response.setContentType("text/html");
+      response.setStatus(HttpServletResponse.SC_OK);
+      // response.getWriter().println("<h1>Hello SimpleServlet</h1>");
+    }
+  }
+
+  public static class HelloPrintingFilter implements Filter {
+    @Override
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+      throws IOException, ServletException {
+      System.out.print("hello from filter");
+    }
+
+    @Override
+    public void init(FilterConfig arg0) throws ServletException {
+
+    }
+
+    @Override
+    public void destroy() {}
   }
 
   private static Server setupJettyServer(SubmarineConfiguration conf) {
